@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: SF EMS Protocols Browser
+  description: Access and read San Francisco EMS protocols, policies, and memos stored in the GitHub repository `nmatt101/sf-ems`.
+  version: 1.0.0
+servers:
+  - url: https://api.github.com
+    description: GitHub REST API server
+
+paths:
+  /repos/{owner}/{repo}/contents/{path}:
+    get:
+      operationId: getFileOrDirectoryContents
+      summary: Get the contents of a file or list files in a directory in the GitHub repo.
+      description: Returns the contents of a file or a list of files in a directory in the GitHub repository.
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+          example: nmatt101
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+          example: sf-ems
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+          example: protocols  # Or e.g., protocols/patient-assessment.md
+      responses:
+        '200':
+          description: File content or directory listing
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: File or directory not found
+
+  /repos/{owner}/{repo}/git/trees/{tree_sha}:
+    get:
+      operationId: listAllFiles
+      summary: Recursively list all files in the GitHub repo.
+      description: Returns the full file tree for the repository. Useful for discovering all Markdown documents.
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+          example: nmatt101
+        - name: repo
+          in: path
+          required: true
+          schema:
+            type: string
+          example: sf-ems
+        - name: tree_sha
+          in: path
+          required: true
+          schema:
+            type: string
+          example: main
+        - name: recursive
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [1]
+          example: 1
+      responses:
+        '200':
+          description: Recursive tree of the repository
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Repository or tree not found

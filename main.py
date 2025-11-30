@@ -110,4 +110,79 @@ def compare_files(
     file2: str = Query(..., description="Path to second markdown file")
 ):
     def fetch_file(path):
-        url = f"https://raw.githubusercontent.com/{GITHUB_OWNE_
+        url = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{BRANCH}/{path}"
+        resp = requests.get(url)
+        return resp.text if resp.status_code == 200 else None
+
+    content1 = fetch_file(file1)
+    content2 = fetch_file(file2)
+
+    if content1 and content2:
+        return {
+            "file1": file1,
+            "content1": content1[:4000],
+            "file2": file2,
+            "content2": content2[:4000]
+        }
+    else:
+        return {"error": "Could not fetch both files."}
+
+@app.get("/quiz")
+def quiz_from_file(
+    file: str = Query(..., description="Path to markdown file to use for quiz")
+):
+    raw_url = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{BRANCH}/{file}"
+    try:
+        response = requests.get(raw_url)
+        if response.status_code == 200:
+            content = response.text
+            return {
+                "file": file,
+                "content": content[:4000]
+            }
+        else:
+            return {"error": f"Failed to fetch file: {response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/timing")
+def extract_time_sensitive_phrases(
+    file: str = Query(..., description="Path to markdown file")
+):
+    raw_url = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{BRANCH}/{file}"
+    try:
+        response = requests.get(raw_url)
+        if response.status_code == 200:
+            content = response.text
+            lines = content.splitlines()
+            time_lines = [line for line in lines if any(
+                phrase in line.lower()
+                for phrase in ["minutes", "seconds", "immediately", "within", "after", "before"]
+            )]
+            return {
+                "file": file,
+                "time_sensitive": time_lines[:20]
+            }
+        else:
+            return {"error": f"Failed to fetch file: {response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/submit-feedback")
+def submit_feedback(
+    file: str = Query(..., description="File the feedback refers to"),
+    comment: str = Query(..., description="The user feedback comment"),
+    email: str = Query(None, description="Optional user email")
+):
+    feedback = {
+        "file": file,
+        "comment": comment,
+        "email": email
+    }
+
+    print("📬 New feedback received:", feedback)  # In real app: log or store it
+    return {
+        "status": "received",
+        "message": "Thank you for your feedback!",
+        "data": feedback
+    }

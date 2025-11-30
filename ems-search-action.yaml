@@ -1,17 +1,18 @@
 openapi: 3.1.0
 info:
-  title: EMS Markdown Search API
+  title: SF EMS Assistant API
+  version: 1.2.0
   description: |
-    Searches EMS protocols, policies, and memos hosted in a public GitHub repo and returns relevant results. 
-    Also allows summarizing individual Markdown files.
-  version: 1.1.0
+    API to search, summarize, quiz, compare, and analyze San Francisco EMS protocols, policies, and memos.
+
 servers:
   - url: https://sf-ems-1.onrender.com
+
 paths:
   /search:
     get:
       operationId: searchMarkdownFiles
-      summary: Search EMS Markdown documents
+      summary: Search for a keyword in all EMS documents
       parameters:
         - name: q
           in: query
@@ -21,7 +22,7 @@ paths:
             type: string
       responses:
         '200':
-          description: List of files and snippets containing the keyword
+          description: List of matched documents and snippet context
           content:
             application/json:
               schema:
@@ -29,3 +30,25 @@ paths:
                 properties:
                   query:
                     type: string
+                  matches:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        file:
+                          type: string
+                        snippet:
+                          type: string
+                        url:
+                          type: string
+
+  /summarize:
+    get:
+      operationId: summarizeFile
+      summary: Get full content of a file for GPT to summarize
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: Path to the markdown file (e.g. Protocols/Airway - RSI.md)
+          schema:

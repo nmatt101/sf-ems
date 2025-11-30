@@ -4,7 +4,8 @@ info:
   description: Searches a list of EMS .md files in a public GitHub repo and returns matching snippets.
   version: 1.0.0
 servers:
-  - url: https://YOUR_RENDER_URL_HERE
+  - url: https://sf-ems-api.onrender.com
+
 paths:
   /search:
     get:

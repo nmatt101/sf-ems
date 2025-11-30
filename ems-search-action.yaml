@@ -52,3 +52,16 @@ paths:
           required: true
           description: Path to the markdown file (e.g. Protocols/Airway - RSI.md)
           schema:
+            type: string
+      responses:
+        '200':
+          description: File content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file:
+                    type: string
+                  content:
+                    type: string
